@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>login</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/skeleton.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <script type="text/javascript" >
+  
+  function login(){
+    var email=document.getElementById("email").value;
+    var password=document.getElementById("password").value;
+    var ref = new Firebase("https://popping-fire-2727.firebaseio.com");
+    ref.authWithPassword({
+      email: email,
+      password: password
+    }, function(error, authData) {
+      if (error) {
+        console.log("Login Failed!", error);
+        document.getElementById("error-info").innerHTML="incorrect password";
+      } else {
+        console.log("Authenticated successfully with payload:", authData);
+        window.location.href="../myProfileEditor/myProfileEditor.html";
+        localStorage.setItem("uid", authData.uid);
+      }
+
+    });
+  }
+
+  function hitsEnter(){
+    if (event.keyCode==13){
+      login();
+    }
+  }
+
+  function redirectIndex(){
+    window.location.href="../index.html";
+  }
+
+  function checkAccStatus(){
+    if (localStorage.getItem("uid")!=null){
+      window.location.href="../myProfileEditor/myProfileEditor.html";
+    }
+  }
+  
+  </script>
+  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+</head>
+<body onLoad="checkAccStatus()">
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row">
+      <div class="three columns" style="margin:5%">
+        <input style="float:left" class="button" type="button" value="home" onClick="redirectIndex()">
+      </div>
+      <div class="nine columns">
+      </div>
+    </div>
+
+    <div class="row" style='margin-top:17%;text-align:center'>
+
+      <h5>Login:</h5>      
+      <input type="text" id="email" placeholder='email@mailbox.com'>
+      <br>
+      <input type="password" id="password" placeholder='password' onKeyDown="hitsEnter()">
+      <br>  
+      <input type="button" value="submit" onClick="login()">
+      <p id="error-info" style="color:red"> </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>toot</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <script type="text/javascript" >
+  
+  //sends the initial information to firebase
+  function hitsEnter(){
+    if (event.keyCode==13){
+      createAccount();
+    }
+  }
+  function createAccount(){
+    //gets the first variables necessary
+    var email=document.getElementById("email").value;
+    var password=document.getElementById("password").value;
+    var conf=document.getElementById("confPassword").value;
+    //makes sure that conf and pw are the same
+    if (conf.localeCompare(password)==0){
+      var ref = new Firebase("https://popping-fire-2727.firebaseio.com");
+      ref.createUser({
+        email    : email,
+        password : password
+      }, function(error, userData) {
+        if (error) {
+          console.log("Error creating user:", error);
+        } 
+        else {
+
+          ref.authWithPassword({
+            email: email,
+            password: password
+          }, function(error, authData) {
+            if (error) {
+              console.log("Login Failed!", error);
+            } else {
+              console.log("Authenticated successfully with payload:", authData);
+            }
+
+          });
+          console.log("Successfully created user account with uid:", userData.uid);
+          var usersRef = ref.child("users");
+          var data = {};
+          data[userData.uid] = {
+            fName: "",
+            lName: "",
+            description:"",
+              city: "",
+              state:"",
+              zipCode:"",
+              gender:"",
+              age:"",
+              highSchools:[],
+              middleSchools:[],
+              uwGpa:"",
+              wGpa:"",
+              courses:[],
+              testList: []
+            };
+          usersRef.set(data);
+          localStorage.setItem("uid", userData.uid);
+          window.location.href="myProfileEditor/myProfileEditor.html";
+        }
+      });
+    }
+    else{
+      console.log("Password mismatch");
+      document.getElementById("error-info").innerHTML="passwords do not match!";
+    }
+  }
+  
+  </script>
+  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row" style='margin-top:30%'>
+      <div class="one-half column" style='text-align:center'>
+        <h4><strong>Students:</strong></h4>
+        <h5>Create an account:</h5>
+        <p id="error-info" style="color:red; font-size:80% ;margin:0px"> </p>
+        <input type="text" id="email" placeholder='email@mailbox.com'>
+        <br>
+        <input type="password" id="password" placeholder='password'>
+        <br>
+        <input type="password" id="confPassword" placeholder='confirm password' onKeyDown="hitsEnter()">
+        <br>
+        <input type="button" value="submit" onClick="createAccount()">
+        <br>
+        or <a href="login/login.html">login</a>.
+
+      </div>
+
+      <div class="one-half column" style='text-align:center'>
+        <h4><strong>Parents:</strong></h4>
+        <p>This is your way to get an effective tutor without paying a premium price. Using the search bar below, put in your zipcode to find tutors near you.</p>
+        <input type="text" id="zipCode" placeholder='i.e. 20854'>
+        <br>
+        <input type="button" value="search" onClick="zipCodeSearch()">
+        <br>
+      </div>
+
+
+      
+
+
+
+      
+
+
+
+    </div>
+  </div>
+</div>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

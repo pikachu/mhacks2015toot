@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+  <script type="text/javascript">
+  function hoverOver(x) {
+    var element = document.getElementById('profPic');
+    element.style.opacity = "0.5";
+  }
+  function hoverOff(x){
+    var element = document.getElementById('profPic');
+    element.style.opacity = "1";
+  }
+
+  //adding another line of test
+  function anotherTest()
+  {
+    var testCollection = document.getElementById("testCollection");
+    var container = document.createElement("div");
+    container.innerHTML = "<div class=\"row\" name=\"testInfo\"><div class=\"four columns\"><input class=\"u-full-width testList\" type=\"text\" placeholder=\"i.e. SAT\"></div><div class=\"two columns\"><input class=\"u-full-width scoreList\" type=\"text\" placeholder=\"i.e. 2400\"></div><div class=\"two columns\"><input class=\"u-full-width dateList\" type=\"text\" placeholder=\"MM/YY\"></div></div>";
+
+    testCollection.appendChild(container.firstChild);
+  }
+
+  function anotherHS()
+  {
+    var hsCollection = document.getElementById("hsCollection");
+    var container = document.createElement("div");
+    container.innerHTML ="<div class=\"row\" name=\"hsInfo\"><input class=\"u-full-width hsName\" type=\"text\" placeholder=\"highSchool\"></div>";
+
+    hsCollection.appendChild(container.firstChild);
+  }
+
+  function anotherMS()
+  {
+    var msCollection = document.getElementById("msCollection");
+    var container = document.createElement("div");
+    container.innerHTML ="<div class=\"row\" name=\"msInfo\"><input class=\"u-full-width msName\" type=\"text\" placeholder=\"middleSchool\"></div>";
+
+    msCollection.appendChild(container.firstChild);
+  }
+
+  function anotherCourse()
+  {
+    var courseCollection = document.getElementById("courseCollection");
+    var container = document.createElement("div");
+    container.innerHTML ="<div class=\"row\" name=\"courseInfo\"><div class=\"six columns\"><input class=\"u-full-width courseList\" type=\"text\"placeholder=\"algebra\"></div><div class=\"two columns\"><input class=\"u-full-width gradeList\" type=\"text\" placeholder=\"A\"></div><div class=\"four columns\"><input class=\"u-full-width courseTypeList\" type=\"text\" placeholder=\"Mathematics\"></div></div>";
+    courseCollection.appendChild(container.firstChild);
+  }
+
+  function viewProfile(){
+    window.location.href="../profilePage/profilePage.html";
+  }
+  //when the save button is clicked
+  function updateInfo(){
+    var ref = new Firebase("https://popping-fire-2727.firebaseio.com");
+    var usersRef = ref.child("users");
+    //first name, last name, description, city, state, zip, gender, age
+    // UWGPA, WGPA will all be done at the end
+    //test information, high school, and middle school are separate
+
+    //updating test information  
+      //this will be what is saved to the firebase
+      var testDataArray = [];
+      //will return an array containing all the test data
+      var testCollection = document.getElementsByName("testInfo");
+      //goes through all of the tests
+      for(var i = 0; i < testCollection.length; i ++)
+      {
+      //pulls out the i-th test
+      var testInDOM = testCollection[i];
+      //will be the data structure that contains 3 elements
+      var testData = {};
+      testData["test"] = testInDOM.getElementsByClassName("testList")[0].value;
+      testData["score"] = testInDOM.getElementsByClassName("scoreList")[0].value;
+      testData["date"] = testInDOM.getElementsByClassName("dateList")[0].value;
+      //pushing each test broken up into three parts into the array to be uploaded
+      testDataArray.push(testData);
+    }
+
+       //this will be what is saved to the firebase
+       var courseDataArray = [];
+      //will return an array containing all the test data
+      var courseCollection = document.getElementsByName("courseInfo");
+      //goes through all of the tests
+      for(var i = 0; i < courseCollection.length; i ++)
+      {
+      //pulls out the i-th test
+      var courseInDOM = courseCollection[i];
+      //will be the data structure that contains 3 elements
+      var courseData = {};
+      courseData["course"] = courseInDOM.getElementsByClassName("courseList")[0].value;
+      courseData["grade"] = courseInDOM.getElementsByClassName("gradeList")[0].value;
+      courseData["courseType"] = courseInDOM.getElementsByClassName("courseTypeList")[0].value;
+      //pushing each course broken up into three parts into the array to be uploaded
+      courseDataArray.push(courseData);
+    }
+
+    //high school update
+    var hsDataArray=[];
+    var hsCollection=document.getElementsByName("hsInfo");
+    for(var i = 0; i < hsCollection.length; i ++)
+    {
+      var hsInDOM=hsCollection[i];
+      var hsData={};
+      hsData["name"]=hsInDOM.getElementsByClassName("hsName")[0].value;
+      hsDataArray.push(hsData);
+    }
+
+    //middle school update
+    var msDataArray=[];
+    var msCollection=document.getElementsByName("msInfo");
+    for(var i = 0; i < msCollection.length; i ++)
+    {
+      var msInDOM=msCollection[i];
+      var msData={};
+      msData["name"]=msInDOM.getElementsByClassName("msName")[0].value;
+      msDataArray.push(msData);
+    }
+    //setting everything final to firebase
+      //creating the empty array
+      var data={};
+      //data for the specific ID will be equal to the ID's retrieved
+      data[localStorage.getItem("uid")] = 
+      {
+        fName: document.getElementById("firstName").value,
+        lName: document.getElementById("lastName").value,
+        testList: testDataArray, 
+        highSchools: hsDataArray,
+        middleSchools: msDataArray,
+        description: document.getElementById("description").value,
+        city: document.getElementById("city").value, 
+        state:document.getElementById("state").value,
+        zipCode:document.getElementById("zipCode").value, 
+        state:document.getElementById("state").value, 
+        gender:document.getElementById("gender").value,
+        age:document.getElementById("age").value,
+        wGpa:document.getElementById("wGpa").value,
+        uwGpa:document.getElementById("uwGpa").value,
+        courses:courseDataArray
+      }
+      console.log(data);
+      //sending everything back up to firebase
+      usersRef.set(data);
+      console.log("successful save");
+      document.getElementById("update-save").innerHTML="save successful!";
+    }
+
+    function redirectHome(){
+      localStorage.removeItem("uid");
+      window.location.href="../index.html";
+
+    }
+  //when the page loads, all information will already be present for exisiting users
+  function onLoad(){
+    console.log(localStorage.getItem("uid"));
+    //creating the firebase object and making sure that they are authorized
+    var ref = new Firebase("https://popping-fire-2727.firebaseio.com");
+    var uid = localStorage.getItem("uid")
+    //if the user is authenticated
+    if(uid)
+    {
+      console.log("user is authorized")
+      //create the reference to the specific uid and create an empty array
+      var userRef = ref.child("users").child(uid);
+      var userData = {};
+      //.once accesses the data stored in firebase
+      userRef.once("value",function(snapshot){
+        //sets all the data of a particular person to the array
+        userData = snapshot.val();
+        //sets first name to what is stored in userData under "fName"
+        document.getElementById("firstName").value=userData.fName;
+        document.getElementById("lastName").value=userData.lName;
+        document.getElementById("city").value=userData.city;
+        document.getElementById("zipCode").value=userData.zipCode;
+        document.getElementById("state").value=userData.state;
+        document.getElementById("uwGpa").value=userData.uwGpa;
+        document.getElementById("wGpa").value=userData.wGpa;
+        document.getElementById("description").value=userData.description;
+
+        //setting testCollection (array) to the array in userData
+        var testCollection=userData.testList;
+        //need to go through each of the tests in the test array
+        for (var i=0;i<testCollection.length;i++)
+        {
+          //if we have more than one test, we create more slots to display more data
+          if (i!=0)
+          {
+            anotherTest();
+          }
+          //testInDOM becomes an array of the i-th test
+          var testInDOM = document.getElementsByName("testInfo")[i];
+          //testList below is reference to HTML id, not to firebase
+          testInDOM.getElementsByClassName("testList")[0].value = testCollection[i]["test"];
+          testInDOM.getElementsByClassName("scoreList")[0].value = testCollection[i]["score"];
+          testInDOM.getElementsByClassName("dateList")[0].value = testCollection[i]["date"];
+        }
+
+        //setting courseCollection (array) to the array in userData
+        var courseCollection=userData.courses;
+        //need to go through each of the tests in the test array
+        for (var i=0;i<courseCollection.length;i++)
+        {
+          //if we have more than one test, we create more slots to display more data
+          if (i!=0)
+          {
+            anotherCourse();
+          }
+          //courseInDOM becomes an array of the i-th test
+          var courseInDOM = document.getElementsByName("courseInfo")[i];
+          //courseList below is reference to HTML id, not to firebase
+          courseInDOM.getElementsByClassName("courseList")[0].value = courseCollection[i]["course"];
+          courseInDOM.getElementsByClassName("gradeList")[0].value = courseCollection[i]["grade"];
+          courseInDOM.getElementsByClassName("courseTypeList")[0].value = courseCollection[i]["courseType"];
+        }
+
+        //setting school Collection (array) to the array in userData
+        var hsCollection=userData.highSchools;
+        //need to go through each of the tests in the test array
+        for (var i=0;i<hsCollection.length;i++)
+        {
+          //if we have more than one test, we create more slots to display more data
+          if (i!=0)
+          {
+            anotherHS();
+          }
+          //school in DOM becomes an array of the i-th test
+          var hsInDOM = document.getElementsByName("hsInfo")[i];
+          //schoolList below is reference to HTML id, not to firebase
+          hsInDOM.getElementsByClassName("hsName")[0].value = hsCollection[i]["name"]
+        }
+
+        //setting school Collection (array) to the array in userData
+        var msCollection=userData.middleSchools;
+        //need to go through each of the tests in the test array
+        for (var i=0;i<msCollection.length;i++)
+        {
+          //if we have more than one test, we create more slots to display more data
+          if (i!=0)
+          {
+            anotherMS();
+          }
+          //school in DOM becomes an array of the i-th test
+          var msInDOM = document.getElementsByName("msInfo")[i];
+          //schoolList below is reference to HTML id, not to firebase
+          msInDOM.getElementsByClassName("msName")[0].value = msCollection[i]["name"]
+        }
+      });
+}
+
+}
+
+</script>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>My Profile</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="../css/normalize.css">
+  <link rel="stylesheet" href="../css/skeleton.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body onLoad="onLoad()">
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row" style="margin:5%">
+      <div class="ten columns" style="margin-left:-5%">
+        <h2>Your profile.</h2>
+      </div>
+      <div class="two columns">
+     
+        <button onClick="redirectHome()">log out</button> 
+   
+    </div>
+</div>
+    <div class="row" style="margin-top: -5%;text-align:center">
+      <img src="../images/avatar.jpg" width="200px" height="200px" style="float=left" onmouseover="hoverOver(this)" onmouseout="hoverOff(this)" id="profPic" >
+    </div>
+    <br>
+    <form>
+      <div class="row">
+        <div class="one-half column">
+          <label for="editFirstName">First Name</label>
+          <input class="u-full-width" type="text" placeholder="firstName" id="firstName">
+        </div>
+        <div class="one-half column">
+          <label for="editLastName">Last Name</label>
+          <input class="u-full-width" type="text" placeholder="lastName" id="lastName">
+        </div>
+      </div>
+      <div class="row">
+        <label for="description">Description</label>
+        <textarea class="u-full-width" placeholder="insert a few words about you" id="description"></textarea>
+      </div>
+      <div class="row">
+        <div class="four columns">
+          <label for="city">City</label>
+          <input class="u-full-width" type="text" placeholder="city" id="city">
+        </div>
+        <div class="two columns">
+          <label for="state">State</label>
+          <input class="u-full-width" type="text" placeholder="MD" id="state">
+        </div>
+        <div class="two columns">
+          <label for="zipCode">Zip Code</label>
+          <input class="u-full-width" type="text" placeholder="20854" id="zipCode">
+        </div>
+        <div class="two columns">
+          <label for="gender">Gender</label>
+          <select class="u-full-width" id="gender">
+            <option value="Option 1">M</option>
+            <option value="Option 2">F</option>
+          </select>
+        </div>
+        <div class="two columns">
+          <label for="age">Age</label>
+          <select class="u-full-width" id="age">
+            <option value="Option 1">14</option>
+            <option value="Option 2">15</option>
+            <option value="Option 3">16</option>
+            <option value="Option 4">17</option>
+            <option value="Option 5">18</option>
+            <option value="Option 6">19</option>
+            <option value="Option 7">20</option>
+          </select>
+        </div>
+      </div>
+      <hr style="margin:5px">
+
+      <div id="hsCollection">
+        <div class="row" name="hsInfo">
+          <label for="highSchoolList">High School(s)</label>
+          <input class="u-full-width hsName" type="text" placeholder="highSchool">
+        </div>
+      </div>
+      <div class="row">
+        <div class="eleven columns">
+          <p style="font-size:70%;margin-top:-12px" onClick="anotherHS()"><a>Add another high school...</a></p>
+        </div>
+      </div>
+
+      <div id="msCollection">
+        <div class="row" name="msInfo">
+          <label for="middleSchoolList">Middle School(s)</label>
+          <input class="u-full-width msName" type="text" placeholder="middleSchool">
+        </div>
+      </div>
+      <div class="row">
+        <div class="eleven columns">
+          <p style="font-size:70%;margin-top:-12px" onClick="anotherMS()"><a>Add another middle school...</a></p>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="one-half column">
+          <label for="editUwGPA">Unweighted GPA</label>
+          <input class="u-full-width" type="text" placeholder="uwGpa" id="uwGpa">
+        </div>
+        <div class="one-half column">
+          <label for="editWGPA">Weighted GPA</label>
+          <input class="u-full-width" type="text" placeholder="wGpa" id="wGpa">
+        </div>
+      </div>
+
+
+      <div id="testCollection">
+        <div class="row" name="testInfo">
+          <div class="four columns">
+            <label for="testList">Tests Taken</label>
+            <input class="u-full-width testList" type="text" placeholder="i.e. SAT">
+          </div>
+          <div class="two columns">
+            <label for="scoreList">Score</label>
+            <input class="u-full-width scoreList" type="text" placeholder="i.e. 2400">
+          </div>
+          <div class="two columns">
+            <label for="dateList">Date Taken</label>
+            <input class="u-full-width dateList" type="text" placeholder="MM/YY">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="eleven columns">
+          <p style="font-size:70%;margin-top:-12px" onClick="anotherTest()"><a>Add another test...</a></p>
+        </div>
+      </div>
+
+      <hr style="margin:5px">
+      <div id="courseCollection">
+        <div class="row" name="courseInfo">
+
+          <div class="six columns">
+            <label for="courseList">Teachable Courses</label>
+            <input class="u-full-width courseList" type="text" placeholder="algebra">
+          </div>
+          <div class="two columns">
+            <label for="age">Grade</label>
+            <input class="u-full-width gradeList" type="text" placeholder="A">
+          </div>
+          <div class="four columns">
+            <label for="generalCourseType">General Course Type</label>
+            <input class="u-full-width courseTypeList" type="text" placeholder="Mathematics">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="eleven columns">
+          <p style="font-size:70%;margin-top:-12px" onClick="anotherCourse()"><a>Add another course...</a></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="two columns">
+          <input class="button-primary" type="button" value="Save!" onClick="updateInfo()"> 
+        </div>
+        <div class="two columns">
+          <input class="button" type="button" value="view profile" onClick="viewProfile()"> 
+        </div>
+      </div>
+      <p id="update-save" style="color:green"></p>
+    </div>
+  </div>
+</form>
+</div>
+
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>
